@@ -1,36 +1,116 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Mind Vault - Frontend
+
+Secure knowledge management system for teams with powerful authentication and role-based access control.
+
+Built with **Next.js 16** (Turbopack), **TypeScript**, and **Tailwind CSS**.
+
+## Features
+
+- 🔐 **Authentication**: Cookie-based auth with server-side middleware protection
+- 👥 **User Management**: Invite system with role-based access (Admin/Member)
+- 🎨 **Modern UI**: Responsive design with light/dark mode support
+- 🔄 **Auto Case Conversion**: Seamless snake_case ↔ camelCase API integration
+- 📱 **SSR-Ready**: Server-side rendering with Next.js middleware
+
+## Prerequisites
+
+- **Node.js** 18+ and npm
+- **Backend API** running on `http://localhost:8000`
 
 ## Getting Started
 
-First, run the development server:
-
+1. **Install dependencies**:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Configure environment** (optional):
+```bash
+cp .env.example .env.local
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. **Run development server**:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. **Open browser**: [http://localhost:3000](http://localhost:3000)
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/              # Next.js pages (App Router)
+├── components/       # Reusable components
+│   ├── forms/       # Form components
+│   ├── guards/      # Auth/Admin guards
+│   └── ui/          # UI components
+├── hooks/           # Custom React hooks
+├── services/        # API services
+├── stores/          # Zustand state management
+├── types/           # TypeScript definitions
+├── middleware.ts    # Route protection
+└── utils/           # Utility functions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+docs/
+├── app-flows.md     # Application flows documentation
+└── coding-sop.md    # Coding standards
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Key Architecture
 
-## Deploy on Vercel
+### Authentication
+- Tokens stored in **HTTP cookies** (not localStorage) for SSR compatibility
+- Server-side route protection via Next.js middleware
+- Auto-refresh user profile on page load
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### API Integration
+- Base URL: `http://localhost:8000/api/v1`
+- Automatic case conversion (snake_case ↔ camelCase)
+- Axios interceptors for auth headers
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### State Management
+- **Zustand** for auth state
+- Triple-layer deduplication for `/auth/me` calls
+
+## Available Scripts
+
+```bash
+npm run dev          # Start development server
+npm run build        # Production build
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npx tsc --noEmit     # TypeScript check
+```
+
+## Documentation
+
+- **[Application Flows](./docs/app-flows.md)** - Complete flow documentation
+- **[Coding Standards](./docs/coding-sop.md)** - Development guidelines
+- **[AI Guidelines](./CLAUDE.md)** - AI-specific development context
+
+## Tech Stack
+
+- **Framework**: Next.js 16 (App Router, Turbopack)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **State**: Zustand
+- **HTTP Client**: Axios
+- **Cookies**: js-cookie
+
+## Code Standards
+
+- ❌ No `any` types (use `unknown`)
+- ✅ Interfaces: `I` prefix (IUser, ISignupRequest)
+- ✅ Types: `T` prefix (TUserRole, TFormMode)
+- ✅ ESLint and TypeScript strict mode
+
+## Contributing
+
+1. Follow [coding standards](./docs/coding-sop.md)
+2. Update [app flows](./docs/app-flows.md) for flow changes
+3. Ensure all tests pass: `npm run lint && npx tsc --noEmit && npm run build`
+
+## License
+
+[Your License Here]
