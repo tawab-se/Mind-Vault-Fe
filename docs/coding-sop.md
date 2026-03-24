@@ -1,10 +1,9 @@
 # Standard Operating Procedure (SOP) for Coding with Standards
-## LinkGraph Customer Frontend
+## Mind Vault Frontend
 
-**Version**: 1.1
-**Last Updated**: 2025-11-11
+**Version**: 0.1.0
 **Maintained By**: Development Team
-**Changelog**: Added MobX reaction patterns, useEffect best practices, accessibility requirements, and enhanced TypeScript/SCSS guidelines
+**Changelog**: Initial SOP for Mind Vault Frontend project
 
 ---
 
@@ -30,40 +29,40 @@
 
 **Before starting any development work:**
 
-- [ ] Environment variables configured (`.env` file copied from `.env.dev`)
-- [ ] Dependencies installed: `make package-install` or `npm install --legacy-peer-deps`
-- [ ] Development server starts successfully: `make dev`
+- [ ] Environment variables configured (`.env.local` file created from `.env.example`)
+- [ ] Dependencies installed: `npm install`
+- [ ] Development server starts successfully: `npm run dev`
 - [ ] Git configured with correct user credentials
 - [ ] IDE/Editor configured with ESLint and TypeScript support
 
 **Verify your setup:**
 ```bash
-# Check Node version (should be compatible with Next.js 14.2.3)
+# Check Node version (should be v20 or higher for Next.js 16.2.1)
 node -v
 
 # Verify dependencies are installed
-ls node_modules
+npm list --depth=0
 
 # Start dev server to ensure everything works
-make dev
+npm run dev
+# Server should start at http://localhost:3000
 ```
 
 ### 1.2 Documentation Review Requirements
 
 **Read before coding:**
 
-- [ ] Review [CLAUDE.md](./CLAUDE.md) for project overview and architecture
-- [ ] Check relevant feature documentation in `@docs/` directory
-- [ ] Review existing components in `src/components/common-components/`
-- [ ] Understand store architecture for your feature area
-- [ ] Check API documentation for endpoints you'll use
+- [ ] Review [README.md](../README.md) for project setup
+- [ ] Review [CLAUDE.md](../CLAUDE.md) and [AGENTS.md](../AGENTS.md) for AI assistant guidelines
+- [ ] Check relevant feature documentation in `docs/` directory
+- [ ] Understand Next.js App Router conventions
+- [ ] Review existing components before creating new ones
 
 **Key documentation files:**
-- `@docs/technical-architecture.md` - System architecture
-- `@docs/api-architecture.md` - API patterns
-- `@docs/mobx-store-documentation.md` - Store patterns
-- `@docs/common-components.md` - Component library
-- `@docs/feature-overview.md` - Business features
+
+- `docs/coding-sop.md` (this file) - Development standards
+- Next.js 16 docs in `node_modules/next/dist/docs/` - Framework reference
+- `README.md` - Project setup and overview
 
 ### 1.3 Codebase Familiarity Guidelines
 
@@ -72,23 +71,21 @@ make dev
 1. **Search for existing solutions:**
    ```bash
    # Search for similar components
-   find src/components -name "*[keyword]*"
+   find src/ -name "*[keyword]*"
 
    # Search for similar functionality in code
    grep -r "functionName" src/
    ```
 
-2. **Check common components library:**
-   - Browse `src/components/common-components/components/`
-   - Review `src/components/common-components/v2/`
+2. **Check existing components:**
+   - Browse `src/app/` for page components
+   - Check `src/components/` for reusable components (if exists)
+   - Review `src/lib/` for utility functions (if exists)
 
-3. **Understand the feature's store:**
-   - Locate store in `src/store/specialized-stores/`
-   - Check if store hooks exist in `src/store/hooks/`
-
-4. **Review API integration:**
-   - Check `src/api/` for existing API clients
-   - Understand BaseApi patterns in `src/api/base-api.ts`
+3. **Review Next.js patterns:**
+   - Understand App Router file conventions
+   - Check `layout.tsx` and `page.tsx` patterns
+   - Review Server vs Client Component usage
 
 ---
 
@@ -97,33 +94,30 @@ make dev
 ### 2.1 Code Style & Formatting
 
 #### ESLint Configuration
-**Base Rules** (Google ESLint + React + Next.js):
+**Base Rules** (Next.js with ESLint 9 Flat Config):
+
+The project uses Next.js ESLint config with TypeScript support:
+- `eslint-config-next/core-web-vitals`
+- `eslint-config-next/typescript`
 
 ```javascript
-// Key rules to follow:
-{
-  "max-len": ["warn", 350],           // Max 350 characters per line
-  "indent": ["error", 2],             // 2 spaces indentation
-  "quotes": ["error", "single"],      // Single quotes required
-  "semi": "error",                    // Semicolons required
-  "no-console": ["warn", {            // Console allowed for debug/warn/error
-    "allow": ["debug", "warn", "error"]
-  }],
-  "no-debugger": "error",             // No debugger statements
-  "arrow-parens": ["error", "as-needed"], // Arrow function parens only when needed
-  "@typescript-eslint/no-unused-vars": "error"  // No unused variables
-}
+// Key rules enforced by Next.js config:
+// - React Hooks rules
+// - Next.js specific rules (Image, Link, etc.)
+// - TypeScript type checking
+// - Accessibility rules (jsx-a11y)
 ```
 
 **Quick Style Rules:**
-- ✅ Use single quotes: `'hello'`
-- ✅ Always use semicolons
+- ✅ Use double quotes for JSX/TSX: `<Component name="value" />`
+- ✅ Use single quotes for regular strings: `'hello'`
+- ✅ Semicolons are optional (follow existing patterns)
 - ✅ 2-space indentation
-- ✅ Max line length: 350 characters (wrap when exceeded)
-- ✅ Console.log allowed for debug/warn/error only
-- ❌ No `any` types unless absolutely necessary
+- ✅ Use Prettier defaults (if configured)
+- ❌ No `any` types (use `unknown` if type is truly unknown)
 - ❌ No unused variables or imports
-- ❌ No debugger statements
+- ❌ No debugger statements in production code
+- ❌ Minimize console.log usage (use proper debugging tools)
 
 #### TypeScript Standards
 
@@ -186,115 +180,7 @@ export type { ISpecificType } from './types';
 // - Easier to understand which types can be extended/implemented
 ```
 
-#### SCSS/CSS Standards
-
-**StyleLint Rules** (Nested pattern with state classes):
-
-```scss
-// ✅ GOOD: Component-based naming with nesting
-.component-name {
-  // Component styles
-
-  .element {
-    // Nested element styles
-  }
-
-  .another-element {
-    // Another nested element
-  }
-
-  &.is-active {  // State classes with 'is-' or 'has-' prefix
-    // Active state
-  }
-
-  &.has-error {
-    // Error state
-  }
-}
-
-// Nesting: Max 10 levels (use carefully)
-.parent {
-  .child {
-    .grandchild {
-      // Avoid deep nesting when possible
-    }
-  }
-}
-
-// ❌ BAD: Avoid vendor prefixes (PostCSS handles this)
-.element {
-  -webkit-transform: rotate(45deg);  // Don't do this
-  transform: rotate(45deg);          // Do this instead
-}
-```
-
-**SCSS Variable Usage (CRITICAL):**
-```scss
-// ✅ GOOD: Use existing variables for colors, spacing, etc.
-@import '@/components/common-components/scss/variables';
-
-.component {
-  color: $primary-color;           // Use variable
-  background: $background-light;    // Use variable
-  padding: $spacing-md;            // Use variable
-  border-radius: $border-radius;   // Use variable
-  font-size: $font-size-base;      // Use variable
-}
-
-// ❌ BAD: Hardcoded values
-.component {
-  color: #0066cc;                  // DON'T hardcode colors!
-  background: #f5f5f5;             // DON'T hardcode colors!
-  padding: 16px;                   // DON'T hardcode spacing!
-  border-radius: 4px;              // DON'T hardcode values!
-}
-
-// IMPORTANT: Always check if a variable exists before introducing hardcoded values
-// This ensures easier implementation of:
-// - Theming systems
-// - Dark mode
-// - Consistent design system
-// - Brand color updates
-```
-
-**SCSS Module Pattern:**
-```typescript
-// Component with SCSS module
-import styles from './style.module.scss';
-
-const Component = () => (
-  <div className={styles.componentName}>
-    <div className={styles.componentName__element}>
-      Content
-    </div>
-  </div>
-);
-```
-
 ### 2.2 Architecture Compliance
-
-#### File Structure Standards
-
-```
-src/
-├── components/
-│   ├── common-components/      # Shared, reusable components
-│   │   ├── components/         # Individual components (atoms & molecules)
-│   │   ├── v2/                # Version 2 components
-│   │   └── scss/              # Shared styles
-│   ├── dashboard/             # Feature-specific components (organisms)
-│   │   └── [feature]/         # Organized by feature domain
-│   └── layoutV2/              # Layout components
-├── pages/                     # Next.js file-based routing
-├── store/                     # MobX State Tree stores
-│   ├── common-store.ts        # Always-loaded stores
-│   ├── specialized-stores/    # Lazy-loaded feature stores
-│   └── hooks/                 # Store access hooks
-├── api/                       # API clients
-│   ├── base-api.ts           # Base HTTP client
-│   └── [feature]-api.ts      # Feature-specific APIs
-└── utils/                     # Shared utility functions
-```
 
 #### Naming Conventions
 
@@ -303,7 +189,6 @@ src/
 kebab-case for files:       button-component.tsx
 kebab-case for folders:     common-components/
 Index files:                index.tsx, index.ts
-Module styles:              style.module.scss
 ```
 
 **TypeScript Naming:**
@@ -338,160 +223,101 @@ const handleClick = (userId: string) => {};
 export const API_BASE_URL = 'https://api.example.com';
 export const MAX_RETRY_COUNT = 3;
 
-// Store naming
-export const ContentOptimizerStore = types.model('ContentOptimizerStore', {});
-export type TContentOptimizerStore = Instance<typeof ContentOptimizerStore>;
-export const initializeContentOptimizerStore = () => {};
-
 // Hook naming
-export function useCAStore() {}
+export function useHomeData() {}
 ```
 
 ### 2.3 Component Architecture Patterns
 
-#### Atomic Design Pattern
+#### Next.js App Router Structure
 
 **Component Hierarchy:**
-1. **Atoms** (`src/components/common-components/components/`):
-   - Basic building blocks (Button, Input, Icon, etc.)
-   - No business logic, highly reusable
-   - Should be used across the entire application
 
-2. **Molecules** (`src/components/common-components/components/`):
-   - Combinations of atoms (SearchBar, FormField, etc.)
-   - Simple, reusable component groups
-   - Composed of 2+ atoms
+1. **Server Components** (default in Next.js 16):
+   - Located in `src/app/` directories
+   - Can fetch data directly
+   - No useState, useEffect, or browser-only APIs
+   - Better performance and SEO
 
-3. **Organisms** (`src/components/dashboard/[feature]/`):
-   - Combinations of 2 or more molecules
-   - Feature-specific components with complex business logic
-   - May include MobX store integration
-   - Examples: Complete forms, data tables with filters, dashboard sections
+2. **Client Components** (with `'use client'`):
+   - Interactive components with hooks
+   - Browser-only features
+   - Event handlers (onClick, onChange, etc.)
+   - Use Context, useState, useEffect
 
-4. **Pages** (`src/pages/`):
-   - Next.js page components
-   - Route-level components with layouts
+3. **Shared/Reusable Components**:
+   - Located in `src/components/` (create if needed)
+   - Can be Server or Client components
+   - Shared across multiple pages/features
 
-**Decision Tree - When to Create vs. Use Existing:**
+4. **Page Components** (`page.tsx`):
+   - Route-level components in `src/app/`
+   - Default to Server Components
+   - Handle data fetching and layout
+
+**Decision Tree - Server vs Client Component:**
 ```
 Need a component?
-├─ Is it a basic UI element (button, input, modal)?
-│  ├─ YES → Check src/components/common-components/components/ first
-│  │         Use existing component if available
-│  └─ NO → Continue
-├─ Is it feature-specific?
-│  ├─ YES → Create in src/components/dashboard/[feature]/
-│  └─ NO → Create in src/components/common-components/components/
-└─ Does it need to be shared across features?
-   ├─ YES → Create in common-components
-   └─ NO → Keep in feature folder
+├─ Does it use hooks (useState, useEffect, etc.)?
+│  └─ YES → Client Component ('use client')
+├─ Does it need browser APIs (window, document)?
+│  └─ YES → Client Component ('use client')
+├─ Does it have event handlers (onClick, etc.)?
+│  └─ YES → Client Component ('use client')
+├─ Can it be static/fetch data on server?
+│  └─ YES → Server Component (default)
+└─ When in doubt → Start with Server Component
 ```
 
 ---
 
 ## 3. Quality Gates Workflow
 
-### 3.1 Pre-Commit Hooks (Automatic)
-
-**What happens when you commit:**
-```bash
-git add .
-git commit -m "Your message"
-
-# Husky pre-commit hook runs automatically:
-# 1. ESLint on staged JS/TS files (with auto-fix)
-# 2. Stylelint on staged CSS/SCSS files (with auto-fix)
-# 3. Fixed files are re-added to staging
-# 4. Commit proceeds if no errors, blocks if errors exist
-```
-
-**If pre-commit hook fails:**
-1. Review error messages in terminal
-2. Fix issues manually if auto-fix didn't work
-3. Re-stage fixed files: `git add .`
-4. Retry commit
-
-### 3.2 Manual Quality Checks
-
-**Run before creating MR/PR:**
-
-```bash
-# Full quality check suite (RECOMMENDED)
-make lint-fix        # ESLint + Stylelint + Type check
-
-# Or run individually:
-npm run type-check   # TypeScript type checking (12GB memory allocation)
-npm run lint-fix     # ESLint auto-fix
-npm run css-lint     # Stylelint for SCSS files
-```
-
-**For verbose output:**
-```bash
-npm run lintVerbose  # See all ESLint warnings and errors
-```
-
-### 3.3 Dead Code Detection
-
-**Run periodically to keep codebase clean:**
-
-```bash
-# Comprehensive dead code analysis
-npm run knip
-
-# Specific analyses
-npm run knip-dependencies  # Find unused dependencies
-npm run knip-exports      # Find unused exports
-npm run find:unused       # Find unused files (next-unused)
-
-# Auto-fix options (use with caution)
-npm run knip-fix          # Auto-fix Knip issues
-npm run knip-fix-remove   # Auto-fix with file removal (dangerous!)
-```
-
-**Review Knip output carefully before auto-fixing!**
-
-### 3.4 Build Verification
+### 3.1 Build Verification
 
 **Before finalizing MR/PR:**
 
 ```bash
+# Run linter
+npm run lint
+
+# Type check
+npx tsc --noEmit
+
 # Production build test
 npm run build
 
-# If build succeeds, optionally test locally
-npm run build:local
+# If build succeeds, test production build locally
 npm run start
+# Visit http://localhost:3000 to verify
 
-# Bundle size analysis (if concerned about performance)
-npm run analyze         # Full analysis
-npm run analyze:browser # Browser bundle only
-npm run analyze:server  # Server bundle only
+# Bundle analysis (add @next/bundle-analyzer if needed)
+# See: https://nextjs.org/docs/app/building-your-application/optimizing/bundle-analyzer
 ```
 
-### 3.5 Quality Gate Checklist
+### 3.2 Quality Gate Checklist
 
 **Before every commit:**
-- [ ] Pre-commit hooks pass automatically
 - [ ] No console errors in development
 - [ ] Component renders correctly
+- [ ] No TypeScript errors
 
 **Before every MR/PR:**
-- [ ] `npm run type-check` passes with no errors
-- [ ] `npm run lint-fix` completes successfully
+- [ ] `npx tsc --noEmit` passes with no errors
+- [ ] `npm run lint` passes
 - [ ] `npm run build` succeeds
 - [ ] Manual testing completed (see Section 7.2)
 - [ ] Accessibility verified (keyboard nav, screen readers - Section 7.5)
 - [ ] No unused imports or variables
 - [ ] No commented-out code (clean it up)
 - [ ] Responsive design verified (if UI changes)
-- [ ] No props spreading anti-patterns (`[...items]`, `{...props}`)
-- [ ] useEffect dependencies use primitives, not objects
+- [ ] Server/Client components used appropriately
+- [ ] No props spreading anti-patterns
 - [ ] Functions with 3+ params use object destructuring
 - [ ] Interfaces use `I` prefix, types use `T` prefix
 
 **Periodically (weekly/sprint):**
-- [ ] Run `npm run knip` and review dead code
-- [ ] Check bundle size with `npm run analyze`
+- [ ] Review bundle size (add @next/bundle-analyzer if needed)
 - [ ] Review and update documentation
 
 ---
@@ -500,15 +326,13 @@ npm run analyze:server  # Server bundle only
 
 ### 4.1 Component Structure Template
 
-**Functional Component with TypeScript:**
+**Client Component with TypeScript:**
 
 ```typescript
-// src/components/dashboard/feature/MyComponent.tsx
-import React, { useState, useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-import { Button } from '@/components/common-components/components/button';
-import { useCAStore } from '@/store/hooks/useCAStore';
-import styles from './style.module.scss';
+// src/components/MyComponent.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
 
 // Props interface (use 'I' prefix for interfaces)
 interface IMyComponentProps {
@@ -519,18 +343,14 @@ interface IMyComponentProps {
 }
 
 // Component implementation
-export const MyComponent: React.FC<IMyComponentProps> = observer(({
+export function MyComponent({
   title,
   userId,
   onComplete,
   isVisible = true
-}) => {
+}: IMyComponentProps) {
   // Local state
   const [isLoading, setIsLoading] = useState(false);
-
-  // Store access
-  const store = useCAStore();
-  const { contentOptimizer } = store;
 
   // Effects
   useEffect(() => {
@@ -544,8 +364,11 @@ export const MyComponent: React.FC<IMyComponentProps> = observer(({
   const handleAction = async () => {
     setIsLoading(true);
     try {
-      await contentOptimizer.performAction(userId);
-      onComplete?.('success');
+      const response = await fetch(`/api/action/${userId}`, {
+        method: 'POST'
+      });
+      const data = await response.json();
+      onComplete?.(data);
     } catch (error) {
       console.error('Action failed:', error);
     } finally {
@@ -558,23 +381,44 @@ export const MyComponent: React.FC<IMyComponentProps> = observer(({
     return null;
   }
 
-  // Render
+  // Render with Tailwind CSS
   return (
-    <div className={styles.myComponent}>
-      <h2 className={styles.myComponent__title}>{title}</h2>
-      <Button
-        type="primary"
-        loading={isLoading}
+    <div className="p-4 rounded-lg shadow">
+      <h2 className="text-2xl font-bold mb-4">{title}</h2>
+      <button
         onClick={handleAction}
+        disabled={isLoading}
+        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
       >
-        Execute Action
-      </Button>
+        {isLoading ? 'Loading...' : 'Execute Action'}
+      </button>
     </div>
   );
-});
+}
+```
 
-// Display name for debugging
-MyComponent.displayName = 'MyComponent';
+**Server Component with TypeScript:**
+
+```typescript
+// src/app/dashboard/page.tsx
+import { getData } from '@/lib/api';
+
+// Server Component (no 'use client')
+export default async function DashboardPage() {
+  // Fetch data directly in Server Component
+  const data = await getData();
+
+  return (
+    <div className="container mx-auto p-4">
+      <h1 className="text-3xl font-bold">Dashboard</h1>
+      <div className="mt-4">
+        {data.map((item) => (
+          <div key={item.id}>{item.name}</div>
+        ))}
+      </div>
+    </div>
+  );
+}
 ```
 
 ### 4.2 Component Best Practices
@@ -582,35 +426,33 @@ MyComponent.displayName = 'MyComponent';
 #### ✅ DO:
 
 ```typescript
-// Use observer wrapper for MobX-connected components
-export const Component = observer(() => {
-  const store = useCAStore();
-  return <div>{store.data}</div>;
-});
+// ✅ Use 'use client' for components with interactivity
+'use client';
+export function Component() {
+  return <div>Interactive content</div>;
+}
 
-// Use React.memo for performance optimization (non-MobX components)
-export const PureComponent = React.memo<Props>(({ data }) => {
+// ✅ Use React.memo for expensive components
+import { memo } from 'react';
+export const PureComponent = memo(function PureComponent({ data }: Props) {
   return <div>{data}</div>;
 });
 
-// Define handlers outside JSX
+// ✅ Define handlers outside JSX
 const handleClick = () => {
   // Logic here
 };
-return <Button onClick={handleClick}>Click</Button>;
+return <button onClick={handleClick}>Click</button>;
 
-// Use proper key props in lists
+// ✅ Use proper key props in lists
 {items.map(item => (
   <Item key={item.id} data={item} />
 ))}
 
-// Use optional chaining for safe access
-const userName = user?.profile?.name;
-
-// Use nullish coalescing for default values
+// ✅ Use nullish coalescing for default values
 const count = data?.count ?? 0;
 
-// ✅ GOOD: Use object parameters for 3+ params
+// ✅ Use object parameters for 3+ params
 interface IGetUserDataParams {
   id: string;
   firstName: string;
@@ -618,23 +460,28 @@ interface IGetUserDataParams {
   isSubscribed: boolean;
 }
 
-const getUserData = ({ id, firstName, lastName, isSubscribed }: IGetUserDataParams) => {
+async function getUserData({
+  id,
+  firstName,
+  lastName,
+  isSubscribed
+}: IGetUserDataParams) {
   // Implementation
-};
+}
 
-// Usage
-getUserData({
-  id: '123',
-  firstName: 'John',
-  lastName: 'Doe',
-  isSubscribed: true
-});
-
-// ✅ GOOD: Pass primitive values as props
+// ✅ Pass primitive values as props
 <Component userId={user.id} isActive={user.isActive} />
 
-// ✅ GOOD: Pass items without spreading
-<Component items={items} />
+// ✅ Use Tailwind CSS for styling
+<div className="flex items-center gap-4 p-4">
+  <span className="text-lg font-semibold">Title</span>
+</div>
+
+// ✅ Server Components for data fetching
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data}</div>;
+}
 ```
 
 #### ❌ DON'T:
@@ -648,11 +495,6 @@ getUserData({
 // Don't use inline objects/arrays in JSX
 <Component style={{marginTop: 10}} />  // Creates new object every render
 <Component items={[1, 2, 3]} />        // Creates new array every render
-
-// Don't forget observer wrapper for MobX
-const Component = ({ store }) => {  // Missing observer - won't react to changes
-  return <div>{store.data}</div>;
-};
 
 // Don't use index as key
 {items.map((item, index) => (
@@ -678,611 +520,316 @@ const getUserData = (
 <Component data={[...originalData, newItem]} />  // BAD - Creates new array every render
 ```
 
-### 4.3 Common Component Usage
+### 4.3 Common Patterns
 
-**Button:**
+**Button with Tailwind:**
 ```typescript
-import { Button } from '@/components/common-components/components/button';
-
-<Button type="primary" onClick={handleClick}>
-  Primary Button
-</Button>
-```
-
-**Modal:**
-```typescript
-import { Modal } from '@/components/common-components/components/modal';
-
-<Modal
-  visible={isVisible}
-  onCancel={handleClose}
-  title="Modal Title"
+<button
+  onClick={handleClick}
+  className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 active:bg-blue-700 disabled:opacity-50"
+  disabled={isLoading}
 >
-  Modal Content
-</Modal>
+  {isLoading ? 'Loading...' : 'Click Me'}
+</button>
 ```
 
-**Error Boundary:**
+**Next.js Link:**
 ```typescript
-import { ErrorBoundary } from '@/components/error-boundary';
+import Link from 'next/link';
 
-<ErrorBoundary>
-  <ComponentThatMightError />
-</ErrorBoundary>
+<Link href="/about" className="text-blue-500 hover:underline">
+  About Page
+</Link>
 ```
 
-**NoSsr (Client-only rendering):**
+**Next.js Image:**
 ```typescript
-import NoSsr from '@mui/material/NoSsr';
+import Image from 'next/image';
 
-<NoSsr>
-  <ClientOnlyComponent />
-</NoSsr>
+<Image
+  src="/logo.png"
+  alt="Logo"
+  width={200}
+  height={100}
+  priority // For above-the-fold images
+/>
 ```
 
-### 4.4 Styling Best Practices
+**Error Boundary (Create Custom):**
+```typescript
+// src/components/ErrorBoundary.tsx
+'use client';
 
-**SCSS Modules:**
-```scss
-// style.module.scss
-.myComponent {
-  padding: 20px;
+import { Component, ReactNode } from 'react';
 
-  &__title {
-    font-size: 24px;
-    font-weight: bold;
+interface Props {
+  children: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+}
+
+export class ErrorBoundary extends Component<Props, State> {
+  constructor(props: Props) {
+    super(props);
+    this.state = { hasError: false };
   }
 
-  &__content {
-    margin-top: 16px;
+  static getDerivedStateFromError() {
+    return { hasError: true };
   }
 
-  &--highlighted {
-    background-color: #fffbea;
-  }
-
-  &.is-active {
-    border: 2px solid #0066cc;
+  render() {
+    if (this.state.hasError) {
+      return <div>Something went wrong.</div>;
+    }
+    return this.props.children;
   }
 }
 ```
-
-**Conditional Classes:**
-```typescript
-import classNames from 'classnames';
-import styles from './style.module.scss';
-
-<div className={classNames(
-  styles.myComponent,
-  { [styles['myComponent--highlighted']]: isHighlighted },
-  { [styles['is-active']]: isActive }
-)}>
-  Content
-</div>
-```
-
----
 
 ## 5. State Management Standards
 
-### 5.1 MobX State Tree Architecture
+### 5.1 React State Management
 
-**Store Lazy-Loading Pattern:**
-```
-Root Store (always loaded)
-├── Common Store (always loaded)
-│   ├── NavBar
-│   ├── Settings
-│   ├── Notifications
-│   ├── Plans
-│   └── Other shared stores
-└── Specialized Stores (lazy-loaded by route)
-    ├── contentAnalysisTools → /content-* routes
-    ├── siteAudit → /site-audit-* routes
-    ├── keywordResearch → /research-* routes
-    ├── backlinkTools → /backlink-* routes
-    └── Other feature stores
-```
+**State Management Options:**
 
-### 5.2 Store Access Pattern (CRITICAL)
+1. **React useState** (Component-level state):
+   ```typescript
+   'use client';
 
-#### ✅ CORRECT: Use Store Hooks
+   import { useState } from 'react';
 
-```typescript
-// Always use provided hooks
-import { useCAStore } from '@/store/hooks/useCAStore';
-import { useSAStore } from '@/store/hooks/useSAStore';
-import { useCommonStore } from '@/store/hooks/useCommonStore';
+   export function Counter() {
+     const [count, setCount] = useState(0);
+     return <button onClick={() => setCount(count + 1)}>{count}</button>;
+   }
+   ```
 
-const Component = observer(() => {
-  // Correct way to access stores
-  const caStore = useCAStore();
-  const saStore = useSAStore();
-  const commonStore = useCommonStore();
+2. **React Context** (Cross-component state):
+   ```typescript
+   'use client';
 
-  const { contentOptimizer } = caStore;
-  const { siteAuditor } = saStore;
-  const { navBar } = commonStore;
+   import { createContext, useContext, useState, ReactNode } from 'react';
 
-  return <div>{/* Use store data */}</div>;
-});
-```
+   interface IThemeContext {
+     theme: 'light' | 'dark';
+     setTheme: (theme: 'light' | 'dark') => void;
+   }
 
-#### ❌ INCORRECT: Direct Store Access
+   const ThemeContext = createContext<IThemeContext | undefined>(undefined);
 
-```typescript
-// NEVER do this - Direct store access
-import { getStore } from '@/store/root-storeV2';
+   export function ThemeProvider({ children }: { children: ReactNode }) {
+     const [theme, setTheme] = useState<'light' | 'dark'>('light');
 
-const Component = () => {
-  const store = getStore().contentAnalysisTools;  // BAD!
-  return <div>{store.data}</div>;
-};
+     return (
+       <ThemeContext.Provider value={{ theme, setTheme }}>
+         {children}
+       </ThemeContext.Provider>
+     );
+   }
 
-// NEVER do this - Manual store initialization
-const store = getStore();
-store.attachStore('feature', initializeFeatureStore());  // BAD!
-```
+   export function useTheme() {
+     const context = useContext(ThemeContext);
+     if (!context) throw new Error('useTheme must be used within ThemeProvider');
+     return context;
+   }
+   ```
 
-### 5.3 MobX Reactions & useEffect Best Practices (CRITICAL)
+3. **URL State** (Next.js searchParams):
+   ```typescript
+   // Server Component
+   export default async function SearchPage({
+     searchParams
+   }: {
+     searchParams: Promise<{ q?: string }>
+   }) {
+     const params = await searchParams;
+     const query = params.q || '';
 
-#### ✅ CORRECT: Use MobX reaction for fine-grained reactivity
+     return <div>Search: {query}</div>;
+   }
+   ```
 
-```typescript
-import { reaction } from 'mobx';
-import { useEffect } from 'react';
-import { observer } from 'mobx-react-lite';
-
-const Component = observer(() => {
-  const store = useCAStore();
-
-  // ✅ GOOD: Use MobX reaction for store-based side effects
-  useEffect(() => {
-    // React to specific store property changes
-    const dispose = reaction(
-      () => store.selectedId,  // Track specific property
-      (selectedId) => {
-        if (selectedId) {
-          console.log('Selected ID changed:', selectedId);
-          // Perform side effect
-        }
-      }
-    );
-
-    return () => dispose();  // Cleanup
-  }, [store]);
-
-  // ✅ GOOD: Use primitive dependencies in useEffect
-  useEffect(() => {
-    fetchData(store.userId);
-  }, [store.userId]);  // Primitive value - GOOD!
-
-  return <div>{store.data}</div>;
-});
-```
-
-#### ❌ INCORRECT: Anti-patterns to avoid
-
-```typescript
-const Component = observer(() => {
-  const store = useCAStore();
-
-  // ❌ CRITICAL: Never serialize full store objects
-  useEffect(() => {
-    console.log('Store changed');
-  }, [JSON.stringify(toJS(store))]);  // BAD! Heavy serialization, memory issues
-
-  // ❌ BAD: Full object as dependency
-  useEffect(() => {
-    fetchData(user);
-  }, [user]);  // BAD! Full object causes unnecessary re-runs
-
-  // ✅ GOOD: Use primitive properties instead
-  useEffect(() => {
-    fetchData(user);
-  }, [user.id]);  // GOOD! Primitive dependency
-
-  // ❌ BAD: Multiple object properties
-  useEffect(() => {
-    processData();
-  }, [config]);  // BAD! Full config object
-
-  // ✅ GOOD: Destructure specific primitives
-  const { isEnabled, maxCount } = config;
-  useEffect(() => {
-    processData();
-  }, [isEnabled, maxCount]);  // GOOD! Primitive dependencies
-
-  return <div>{store.data}</div>;
-});
-```
+4. **Third-party libraries** (if needed):
+   - Zustand (lightweight)
+   - Redux Toolkit (complex apps)
+   - Jotai (atomic state)
 
 **Key Rules for useEffect Dependencies:**
 
-1. **99% of cases: Use primitives** (boolean, number, string)
-   - ✅ `[user.id, isActive, count]`
+1. **Use primitives** (boolean, number, string)
+   - ✅ `[userId, isActive, count]`
    - ❌ `[user, config, data]`
 
-2. **Never use `JSON.stringify(toJS(store))`**
-   - Causes performance issues
-   - Memory heap problems
-   - Heavy object serialization
-
-3. **Use MobX `reaction` for store reactivity**
-   - More efficient than useEffect for store changes
-   - Fine-grained control over what triggers effects
-   - Better performance and memory usage
-
-4. **If you must use objects, use React hooks:**
+2. **Use useMemo/useCallback for object dependencies:**
    ```typescript
-   // For object dependencies, use useMemo/useCallback
-   const memoizedValue = useMemo(() => ({ ...config }), [config.key1, config.key2]);
+   const memoizedValue = useMemo(
+     () => ({ key: value }),
+     [value]
+   );
    ```
 
-### 5.4 Store Implementation Pattern
-
-**Store Structure:**
-```typescript
-// src/store/specialized-stores/feature-store.ts
-import { types, flow, Instance } from 'mobx-state-tree';
-import { FeatureApi } from '@/api/feature-api';
-
-const featureApi = new FeatureApi();
-
-// Models
-export const FeatureDataModel = types.model('FeatureDataModel', {
-  id: types.string,
-  name: types.string,
-  value: types.number,
-  createdAt: types.maybeNull(types.string)
-});
-
-// Store
-export const FeatureStore = types
-  .model('FeatureStore', {
-    data: types.array(FeatureDataModel),
-    isLoading: false,
-    error: types.maybeNull(types.string),
-    selectedId: types.maybeNull(types.string)
-  })
-  .views(self => ({
-    // Computed values
-    get selectedItem() {
-      return self.data.find(item => item.id === self.selectedId);
-    },
-
-    get dataCount() {
-      return self.data.length;
-    },
-
-    // Derived state
-    get hasData() {
-      return self.data.length > 0;
-    }
-  }))
-  .actions(self => ({
-    // Synchronous actions
-    setSelectedId(id: string | null) {
-      self.selectedId = id;
-    },
-
-    reset() {
-      self.data.clear();
-      self.isLoading = false;
-      self.error = null;
-      self.selectedId = null;
-    },
-
-    // Asynchronous actions (use flow)
-    fetchData: flow(function* (params: { userId: string }) {
-      self.isLoading = true;
-      self.error = null;
-
-      try {
-        const response = yield featureApi.getData(params);
-        self.data = response.data;
-      } catch (error) {
-        self.error = error.message || 'Failed to fetch data';
-        console.error('FeatureStore.fetchData error:', error);
-      } finally {
-        self.isLoading = false;
-      }
-    }),
-
-    createItem: flow(function* (itemData: { name: string; value: number }) {
-      try {
-        const response = yield featureApi.createItem(itemData);
-        self.data.push(response.data);
-        return response.data;
-      } catch (error) {
-        self.error = error.message || 'Failed to create item';
-        console.error('FeatureStore.createItem error:', error);
-        throw error;
-      }
-    }),
-
-    updateItem: flow(function* (id: string, updates: Partial<{ name: string; value: number }>) {
-      try {
-        const response = yield featureApi.updateItem(id, updates);
-        const index = self.data.findIndex(item => item.id === id);
-        if (index !== -1) {
-          self.data[index] = response.data;
-        }
-        return response.data;
-      } catch (error) {
-        self.error = error.message || 'Failed to update item';
-        console.error('FeatureStore.updateItem error:', error);
-        throw error;
-      }
-    }),
-
-    deleteItem: flow(function* (id: string) {
-      try {
-        yield featureApi.deleteItem(id);
-        const index = self.data.findIndex(item => item.id === id);
-        if (index !== -1) {
-          self.data.splice(index, 1);
-        }
-      } catch (error) {
-        self.error = error.message || 'Failed to delete item';
-        console.error('FeatureStore.deleteItem error:', error);
-        throw error;
-      }
-    })
-  }));
-
-// Type exports
-export type FeatureStoreType = Instance<typeof FeatureStore>;
-
-// Store initialization
-export const initializeFeatureStore = (): FeatureStoreType => {
-  return FeatureStore.create({
-    data: [],
-    isLoading: false,
-    error: null,
-    selectedId: null
-  });
-};
-```
-
-**Store Hook:**
-```typescript
-// src/store/hooks/useFeatureStore.ts
-import { getStore } from '@/store/root-storeV2';
-import { initializeFeatureStore, FeatureStoreType } from '@/store/specialized-stores/feature-store';
-
-export function useFeatureStore(): FeatureStoreType {
-  const store = getStore();
-
-  if (!store.featureTools) {
-    store.attachStore('featureTools', initializeFeatureStore());
-  }
-
-  return store.featureTools as FeatureStoreType;
-}
-```
-
-### 5.4 Store Best Practices
-
-#### ✅ DO:
-
-```typescript
-// Use flow for async operations
-fetchData: flow(function* (params) {
-  try {
-    const response = yield api.getData(params);
-    self.data = response.data;
-  } catch (error) {
-    self.error = error.message;
-  }
-})
-
-// Use views for computed values
-.views(self => ({
-  get filteredData() {
-    return self.data.filter(item => item.isActive);
-  }
-}))
-
-// Handle errors properly
-try {
-  yield api.call();
-} catch (error) {
-  self.error = error.message || 'Operation failed';
-  console.error('Store action error:', error);
-}
-
-// Use maybeNull for nullable values
-error: types.maybeNull(types.string)
-```
-
-#### ❌ DON'T:
-
-```typescript
-// Don't use async/await (use flow instead)
-async fetchData() {  // BAD - won't work properly with MobX State Tree
-  const data = await api.getData();
-  self.data = data;
-}
-
-// Don't mutate state outside actions
-const store = useFeatureStore();
-store.data.push(newItem);  // BAD - must be in action
-
-// Don't forget error handling
-fetchData: flow(function* () {
-  const data = yield api.getData();  // BAD - no try/catch
-  self.data = data;
-})
-
-// Don't use undefined (use maybeNull)
-error: types.maybe(types.string)  // BAD - use maybeNull
-```
-
+3. **Consider moving state to URL** for shareable state
 ---
 
 ## 6. API Integration Standards
 
-### 6.1 BaseApi Extension Pattern
+### 6.1 Next.js API Routes Pattern
 
-**API Client Structure:**
+**API Route Structure:**
+
 ```typescript
-// src/api/feature-api.ts
-import { BaseApi } from '@/api/base-api';
-import { getApiUrl } from '@/api/common-utils';
+// src/app/api/users/route.ts
+import { NextRequest, NextResponse } from 'next/server';
 
-// Request/Response interfaces
-export interface FeatureGetParams {
-  userId: string;
-  startDate?: string;
-  endDate?: string;
-  limit?: number;
-}
-
-export interface FeatureDataResponse {
-  data: Array<{
-    id: string;
-    name: string;
-    value: number;
-    createdAt: string;
-  }>;
-  total: number;
-  page: number;
-}
-
-export interface FeatureCreateRequest {
-  name: string;
-  value: number;
-  metadata?: Record<string, any>;
-}
-
-export interface FeatureUpdateRequest {
-  name?: string;
-  value?: number;
-  metadata?: Record<string, any>;
-}
-
-// API Client
-export class FeatureApi extends BaseApi {
-  constructor() {
-    // Use appropriate host from environment
-    super(getApiUrl(BaseApi.LG_HOST));  // or CA_HOST, SA_HOST, etc.
-  }
-
-  /**
-   * Get feature data
-   */
-  async getData(params: FeatureGetParams): Promise<FeatureDataResponse> {
-    return this.get('/api/feature/data/', params);
-  }
-
-  /**
-   * Create new item
-   */
-  async createItem(data: FeatureCreateRequest): Promise<{ data: any }> {
-    return this.post('/api/feature/items/', data);
-  }
-
-  /**
-   * Update existing item
-   */
-  async updateItem(id: string, data: FeatureUpdateRequest): Promise<{ data: any }> {
-    return this.put(`/api/feature/items/${id}/`, data);
-  }
-
-  /**
-   * Delete item
-   */
-  async deleteItem(id: string): Promise<void> {
-    return this.delete(`/api/feature/items/${id}/`);
-  }
-
-  /**
-   * Batch operation example
-   */
-  async batchUpdate(ids: string[], updates: FeatureUpdateRequest): Promise<{ updated: number }> {
-    return this.post('/api/feature/batch-update/', {
-      ids,
-      updates
-    });
-  }
-}
-
-// Export singleton instance
-export const featureApi = new FeatureApi();
-```
-
-### 6.2 API Host Configuration
-
-**Available Hosts:**
-```typescript
-// From src/api/common-utils.ts
-BaseApi.LG_HOST              // Primary LinkGraph API
-BaseApi.GSC_HOST             // Google Search Console
-BaseApi.KW_HOST              // Keyword Research
-BaseApi.BL_HOST              // Backlink Analysis
-BaseApi.CA_HOST              // Content Assistant
-BaseApi.SA_HOST              // Site Auditor
-BaseApi.OTTO_PPC_HOST        // PPC Automation
-BaseApi.APP_HEALTH_CHECK_HOST // Health Monitoring
-```
-
-**Choosing the right host:**
-```typescript
-// Content-related features → CA_HOST
-export class ContentApi extends BaseApi {
-  constructor() {
-    super(getApiUrl(BaseApi.CA_HOST));
-  }
-}
-
-// Site audit features → SA_HOST
-export class AuditApi extends BaseApi {
-  constructor() {
-    super(getApiUrl(BaseApi.SA_HOST));
-  }
-}
-
-// General features → LG_HOST
-export class GeneralApi extends BaseApi {
-  constructor() {
-    super(getApiUrl(BaseApi.LG_HOST));
-  }
-}
-```
-
-### 6.3 Error Handling
-
-**BaseApi handles these automatically:**
-- Authentication (JWT token injection)
-- Request/response transformation (snake_case ↔ camelCase)
-- Request cancellation for duplicates
-- OpenTelemetry tracing
-
-**Manual error handling in stores:**
-```typescript
-fetchData: flow(function* (params) {
-  self.isLoading = true;
-  self.error = null;
-
+export async function GET(request: NextRequest) {
   try {
-    const response = yield featureApi.getData(params);
-    self.data = response.data;
-    return response;
+    const searchParams = request.nextUrl.searchParams;
+    const query = searchParams.get('q');
+
+    // Fetch data
+    const users = await fetchUsers(query);
+
+    return NextResponse.json({ users });
   } catch (error) {
-    // Error is already processed by BaseApi
-    const errorMessage = error.message || 'Failed to fetch data';
-    self.error = errorMessage;
-    console.error('FeatureStore.fetchData error:', error);
-
-    // Optionally show notification
-    // notification.error({ message: 'Error', description: errorMessage });
-
-    throw error;  // Re-throw if caller needs to handle
-  } finally {
-    self.isLoading = false;
+    return NextResponse.json(
+      { error: 'Failed to fetch users' },
+      { status: 500 }
+    );
   }
-})
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const body = await request.json();
+
+    // Validate input
+    if (!body.name || !body.email) {
+      return NextResponse.json(
+        { error: 'Name and email are required' },
+        { status: 400 }
+      );
+    }
+
+    // Create user
+    const user = await createUser(body);
+
+    return NextResponse.json({ user }, { status: 201 });
+  } catch (error) {
+    return NextResponse.json(
+      { error: 'Failed to create user' },
+      { status: 500 }
+    );
+  }
+}
+```
+
+**Dynamic Route:**
+```typescript
+// src/app/api/users/[id]/route.ts
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const user = await fetchUser(id);
+
+  if (!user) {
+    return NextResponse.json(
+      { error: 'User not found' },
+      { status: 404 }
+    );
+  }
+
+  return NextResponse.json({ user });
+}
+```
+
+### 6.2 Client-Side API Calls
+
+**Using fetch in Client Components:**
+```typescript
+'use client';
+
+import { useState, useEffect } from 'react';
+
+interface IUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export function UserList() {
+  const [users, setUsers] = useState<IUser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadUsers() {
+      try {
+        const response = await fetch('/api/users');
+        const data = await response.json();
+        setUsers(data.users);
+      } catch (error) {
+        console.error('Failed to load users:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadUsers();
+  }, []);
+
+  if (loading) return <div>Loading...</div>;
+
+  return (
+    <ul>
+      {users.map(user => (
+        <li key={user.id}>{user.name}</li>
+      ))}
+    </ul>
+  );
+}
+```
+
+### 6.3 Server Component Data Fetching
+
+**Fetch in Server Components:**
+```typescript
+// src/app/users/page.tsx
+interface IUser {
+  id: string;
+  name: string;
+  email: string;
+}
+
+async function getUsers(): Promise<IUser[]> {
+  const response = await fetch('https://api.example.com/users', {
+    next: { revalidate: 3600 } // Cache for 1 hour
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch users');
+  }
+
+  return response.json();
+}
+
+export default async function UsersPage() {
+  const users = await getUsers();
+
+  return (
+    <div>
+      <h1>Users</h1>
+      <ul>
+        {users.map(user => (
+          <li key={user.id}>{user.name}</li>
+        ))}
+      </ul>
+    </div>
+  );
+}
 ```
 
 ### 6.4 API Best Practices
@@ -1290,55 +837,79 @@ fetchData: flow(function* (params) {
 #### ✅ DO:
 
 ```typescript
-// Always extend BaseApi
-export class MyApi extends BaseApi {
-  constructor() {
-    super(getApiUrl(BaseApi.LG_HOST));
+// ✅ Use Next.js API Routes
+// src/app/api/users/route.ts
+export async function GET(request: NextRequest) {
+  const users = await db.users.findMany();
+  return NextResponse.json({ users });
+}
+
+// ✅ Use proper TypeScript interfaces
+interface IGetUsersResponse {
+  users: IUser[];
+  total: number;
+}
+
+async function getUsers(): Promise<IGetUsersResponse> {
+  const response = await fetch('/api/users');
+  return response.json();
+}
+
+// ✅ Handle errors properly
+async function fetchData() {
+  try {
+    const response = await fetch('/api/data');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Fetch failed:', error);
+    throw error;
   }
 }
 
-// Use proper TypeScript interfaces for requests/responses
-async getData(params: GetParams): Promise<DataResponse> {
-  return this.get('/api/endpoint/', params);
+// ✅ Use Next.js caching
+const response = await fetch('https://api.example.com/data', {
+  next: { revalidate: 3600 } // ISR: revalidate every hour
+});
+
+// ✅ Use Server Components for data fetching when possible
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data}</div>;
 }
-
-// Handle errors in stores, not API layer
-// (BaseApi handles common errors automatically)
-
-// Use descriptive method names
-async getUserProfile(userId: string): Promise<UserProfile> {}
-async updateUserSettings(userId: string, settings: Settings): Promise<void> {}
-
-// Document complex endpoints
-/**
- * Retrieves paginated user activity logs
- * @param userId - The user's unique identifier
- * @param options - Pagination and filter options
- * @returns Paginated activity log response
- */
-async getUserActivityLogs(userId: string, options: PaginationOptions): Promise<PaginatedResponse> {}
 ```
 
 #### ❌ DON'T:
 
 ```typescript
-// Don't create raw axios instances
-import axios from 'axios';
-const api = axios.create({ baseURL: 'https://api.example.com' });  // BAD
-
-// Don't ignore error handling
-async getData() {
-  return this.get('/api/endpoint/');  // No error handling - risky
+// ❌ Don't use any types
+async function getData(params: any): Promise<any> {
+  // BAD - use proper interfaces
 }
 
-// Don't use any types
-async getData(params: any): Promise<any> {  // BAD - use proper types
-  return this.get('/api/endpoint/', params);
+// ❌ Don't ignore errors
+async function fetchData() {
+  const response = await fetch('/api/data');
+  return response.json(); // What if response is not ok?
 }
 
-// Don't forget to return promises
-async createUser(data: UserData) {
-  this.post('/api/users/', data);  // Missing return!
+// ❌ Don't fetch in Client Components if Server Component works
+'use client';
+export default function Page() {
+  const [data, setData] = useState(null);
+  useEffect(() => {
+    fetch('/api/data').then(r => r.json()).then(setData);
+  }, []);
+  // Better: Use Server Component
+}
+
+// ❌ Don't forget to handle loading/error states
+async function loadData() {
+  const data = await fetch('/api/data');
+  // What about loading? What about errors?
+  return data;
 }
 ```
 
@@ -1346,83 +917,258 @@ async createUser(data: UserData) {
 
 ## 7. Testing Requirements
 
-### 7.1 E2E Testing with Playwright
+### 7.1 Testing Setup
 
-**Test File Location:**
-```
-/e2e/
-├── tests/
-│   ├── feature.spec.ts
-│   └── other-feature.spec.ts
-├── auth/
-│   └── storage.json
-└── playwright.config.ts
+**Testing Libraries (to be added):**
+
+```bash
+# Install testing libraries (when needed)
+npm install -D @testing-library/react @testing-library/jest-dom jest jest-environment-jsdom
+
+# For E2E testing
+npm install -D @playwright/test
+npx playwright install
 ```
 
-**Writing E2E Tests:**
+**Jest Configuration (create when adding tests):**
+```javascript
+// jest.config.js
+const nextJest = require('next/jest');
+
+const createJestConfig = nextJest({
+  dir: './',
+});
+
+const customJestConfig = {
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+  testEnvironment: 'jest-environment-jsdom',
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+};
+
+module.exports = createJestConfig(customJestConfig);
+```
+
+**Component Testing Example:**
 ```typescript
-// e2e/tests/my-feature.spec.ts
-import { test, expect } from '@playwright/test';
+// src/components/__tests__/Button.test.tsx
+import { render, screen, fireEvent } from '@testing-library/react';
+import { Button } from '../Button';
 
-test.describe('My Feature', () => {
-  test.beforeEach(async ({ page }) => {
-    // Setup - navigate to feature page
-    await page.goto('/my-feature');
-    await page.waitForLoadState('networkidle');
+describe('Button', () => {
+  it('renders button with text', () => {
+    render(<Button>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeInTheDocument();
   });
 
-  test('should display feature data correctly', async ({ page }) => {
-    // Arrange - wait for data to load
-    await page.waitForSelector('[data-testid="feature-container"]');
+  it('calls onClick when clicked', () => {
+    const handleClick = jest.fn();
+    render(<Button onClick={handleClick}>Click me</Button>);
 
-    // Act - interact with feature
-    await page.click('[data-testid="load-button"]');
-    await page.waitForSelector('[data-testid="data-item"]');
-
-    // Assert - verify expected outcome
-    const items = await page.locator('[data-testid="data-item"]').count();
-    expect(items).toBeGreaterThan(0);
-
-    const title = await page.textContent('[data-testid="feature-title"]');
-    expect(title).toContain('Expected Title');
+    fireEvent.click(screen.getByText('Click me'));
+    expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
-  test('should handle errors gracefully', async ({ page }) => {
-    // Simulate error condition
-    await page.route('**/api/feature/**', route => {
-      route.fulfill({
-        status: 500,
-        body: JSON.stringify({ error: 'Server error' })
-      });
-    });
-
-    await page.click('[data-testid="load-button"]');
-    await page.waitForSelector('[data-testid="error-message"]');
-
-    const errorText = await page.textContent('[data-testid="error-message"]');
-    expect(errorText).toContain('error');
+  it('is disabled when disabled prop is true', () => {
+    render(<Button disabled>Click me</Button>);
+    expect(screen.getByText('Click me')).toBeDisabled();
   });
 });
 ```
 
-**Running Tests:**
+**Running Tests (after setup):**
 ```bash
-# Run all E2E tests
+# Run all tests
+npm run testHere’s a **highly optimized prompt for Claude** to generate the frontend for your authentication flow, fully aligned with your backend, Tailwind + ShadeCN design system, minimal state management using **Zustand only where necessary**, and best practices for structure and reusable components.
+
+---
+
+**Prompt for Claude (Frontend Auth Flow)**
+
+You are a senior frontend architect.
+
+Tech Stack:
+
+* React 18 + Next.js 13 (app router)
+* TypeScript
+* TailwindCSS for styling
+* ShadeCN components
+* Axios for API calls
+* Zustand for state management (only where necessary, e.g., auth state)
+
+Backend:
+
+* Running on **[http://localhost:8000](http://localhost:8000)**
+* Endpoints:
+
+  * POST `/auth/signup` → signup (organization + admin user)
+  * GET `/auth/me` → get current user profile
+  * POST `/invitations` → create invitation (admin only)
+  * POST `/invitations/accept` → accept invitation
+
+---
+
+### 🎯 Goal
+
+Build a **clean, modular, production-ready authentication frontend** with:
+
+* Signup (organization + admin)
+* Login (token verification + profile fetch)
+* Invite users (admin only)
+* Accept invitations
+
+---
+
+### ⚠️ Rules & Best Practices
+
+1. **Minimal State Management**:
+
+   * Use **Zustand** **only** for auth state (current user info + token).
+   * Do not create unnecessary stores.
+
+2. **Centralized API**:
+
+   * Create `src/services/base-api.ts` with Axios instance.
+   * Automatically convert all API responses from snake_case to camelCase.
+   * All other API modules (signup, login, invitations) should **extend base-api**.
+
+3. **UI & Styling**:
+
+   * Use **ShadeCN components** wherever possible.
+   * Reusable common components for buttons, inputs, modals, alerts.
+   * Tailwind + project theme colors:
+
+     * **Dark mode**:
+
+       * App background: `#0C0E12`
+       * Button border: `transparent`
+       * Button background: `#936BDA`
+       * Button text: `#fff`
+       * Font: `Inter`
+     * **Light mode**:
+
+       * App background: `#fff`
+       * Button border: `1px solid #121212`
+       * Button background: `transparent`
+       * Button text: `#121212`
+       * Font: `Inter`
+
+4. **Folder Structure**:
+
+```plaintext
+src/
+├── app/
+│   ├── auth/
+│   │   ├── login/page.tsx
+│   │   ├── signup/page.tsx
+│   │   ├── invite/page.tsx
+│   │   └── accept-invite/page.tsx
+├── components/
+│   ├── forms/
+│   │   ├── LoginForm.tsx
+│   │   ├── SignupForm.tsx
+│   │   ├── InviteForm.tsx
+│   │   └── AcceptInvitationForm.tsx
+│   └── ui/                # Common reusable UI components (buttons, inputs, modals, alerts)
+├── contexts/             # Optional, minimal usage if needed
+├── hooks/
+│   └── useAuth.ts         # Custom hook for auth interactions
+├── services/
+│   ├── base-api.ts        # Axios instance, snake_case → camelCase conversion
+│   ├── auth-api.ts        # Extend base-api for auth endpoints
+│   ├── invitations-api.ts # Extend base-api for invitation endpoints
+│   └── users-api.ts       # Extend base-api for user-related endpoints
+├── stores/
+│   └── auth-store.ts      # Zustand store for auth state (only)
+├── types/
+│   └── auth.ts            # Types for User, Organization, Invitation
+└── utils/
+```
+
+---
+
+### 🧩 Frontend Auth Flow
+
+1️⃣ **Signup (`/auth/signup`)**
+
+* Form: `email`, `password`, `organizationName`
+* On submit → POST `/auth/signup` via `auth-api.ts`
+* Store token in Zustand + redirect to `/auth/me`
+* Show API errors clearly
+
+2️⃣ **Login (`/auth/login`)**
+
+* Form: `email`, `password`
+* On submit → fetch token/profile
+* Store token in Zustand
+* Redirect to dashboard or `/auth/me`
+
+3️⃣ **Invite User (`/auth/invite`)**
+
+* Form: `email`, `role`
+* Admin-only page
+* On submit → POST `/invitations`
+* Show invitation link on success
+
+4️⃣ **Accept Invitation (`/auth/accept-invite?token=...`)**
+
+* Form shows email (read-only) + password
+* On submit → POST `/invitations/accept`
+* Redirect to login on success
+
+---
+
+### 🔐 Auth State
+
+* Zustand store must hold: `token` + `currentUser`
+* Expose `login`, `logout`, `signup`, `refreshProfile` actions
+* Pages requiring auth must guard via `useAuth` hook
+* Automatically fetch `/auth/me` if token exists
+
+---
+
+### 💡 UI & UX
+
+* ShadeCN components for all inputs, buttons, modals, alerts
+* Tailwind for colors, spacing, fonts
+* Responsive for mobile + desktop
+* Loading states for all async actions
+* Clear error/success messages
+
+---
+
+### 📦 Output Format for Claude
+
+1. `base-api.ts` → Axios instance + snake_case → camelCase
+2. `auth-api.ts`, `invitations-api.ts`, `users-api.ts` → extend base-api
+3. Zustand store → `auth-store.ts`
+4. `useAuth.ts` hook for auth interactions
+5. Pages + forms → `/auth/login`, `/auth/signup`, `/auth/invite`, `/auth/accept-invite`
+6. Common UI components → reusable across all pages
+7. Fully typed with TypeScript
+
+---
+
+🎯 **Priority:** **Correctness > Reusability > Clean Architecture**
+
+Start now.
+
+---
+
+If you want, I can also **write a ready-to-use version of this prompt with base-api, stores, types, and folder placeholders prefilled**, so Claude can generate the full frontend auth flow **in one go**.
+
+Do you want me to prepare that full ready-to-use prompt?
+
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
+
+# Run E2E tests (after installing Playwright)
 npm run test:e2e
-
-# Run specific test file
-npm run test:e2e -- e2e/tests/my-feature.spec.ts
-
-# Run with UI (interactive mode)
-npm run test:e2e:ui
-
-# Run in debug mode
-npm run test:e2e:debug
-
-# Run with specific browser
-npm run test:e2e -- --project=chromium
-npm run test:e2e -- --project=firefox
-npm run test:e2e -- --project=webkit
 ```
 
 ### 7.2 Manual Testing Checklist
@@ -1470,18 +1216,23 @@ npm run test:e2e -- --project=webkit
 
 ### 7.3 Test Data Management
 
-**Using Test Accounts:**
-```typescript
-// .env.e2e
-TEST_USER_EMAIL=test@example.com
-TEST_USER_PASSWORD=testpassword123
-TEST_API_BASE_URL=https://staging.api.example.com
+**Environment Variables for Testing:**
+```bash
+# .env.test (create when needed)
+NEXT_PUBLIC_API_URL=http://localhost:3000/api
+DATABASE_URL=postgresql://test:test@localhost:5432/test_db
 ```
 
-**Authentication Setup:**
-```bash
-# Set up authentication for E2E tests
-npm run test:e2e:auth
+**Mock Data:**
+```typescript
+// src/lib/mocks/users.ts
+export const mockUsers = [
+  { id: '1', name: 'John Doe', email: 'john@example.com' },
+  { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
+];
+
+// Use in tests
+import { mockUsers } from '@/lib/mocks/users';
 ```
 
 ### 7.4 Adding Test IDs
@@ -1559,35 +1310,6 @@ npm run test:e2e:auth
 - [ ] Escape key closes modals/dropdowns
 - [ ] Arrow keys navigate lists/menus (where applicable)
 
-#### Screen Reader Support
-
-**Use sr-only (screen reader only) classes for hidden but accessible content:**
-
-```scss
-// SCSS utility class (should already exist in common styles)
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
-}
-
-.sr-only-focusable:focus {
-  position: static;
-  width: auto;
-  height: auto;
-  padding: inherit;
-  margin: inherit;
-  overflow: visible;
-  clip: auto;
-  white-space: normal;
-}
-```
 
 **Screen Reader Examples:**
 
@@ -1754,57 +1476,48 @@ npm run test:e2e:auth
 
 ## 8. Git & Version Control
 
-### 8.1 Branch Strategy
-
-**Branch Hierarchy:**
-```
-master (production)
-├── staging (pre-production)
-    └── develop (active development)
-        ├── feature/[issue-number]-[description]
-        ├── fix/[issue-number]-[description]
-        └── refactor/[issue-number]-[description]
-```
-
 **Branch Naming Convention:**
 ```bash
 # Feature branches
-feature/12345-add-user-dashboard
-feature/12346-implement-search-functionality
+feature/add-auth
+feature/implement-search-functionality
 
 # Bug fix branches
-fix/12347-resolve-login-error
-fix/12348-correct-data-display-issue
+fix/resolve-login-error
+fix/correct-data-display-issue
 
 # Refactoring branches
-refactor/12349-update-store-architecture
-refactor/12350-simplify-api-client
+refactor/update-api-architecture
+refactor/simplify-components
 
-# Hotfix branches (for production)
-hotfix/12351-critical-security-patch
+# Hotfix branches
+hotfix/critical-security-patch
+
+# Documentation branches
+docs/update-readme
 ```
 
 ### 8.2 Creating a Feature Branch
 
 ```bash
-# 1. Ensure you're on develop branch
-git checkout develop
+# 1. Ensure you're on main branch
+git checkout main
 
 # 2. Pull latest changes
-git pull origin develop
+git pull origin main
 
 # 3. Create feature branch
-git checkout -b feature/12345-my-feature-description
+git checkout -b feature/add-user-dashboard
 
 # 4. Work on your feature
 # ... make changes ...
 
-# 5. Commit changes (pre-commit hooks will run)
+# 5. Commit changes
 git add .
-git commit -m "Add user dashboard with analytics"
+git commit -m "feat: Add user dashboard with analytics"
 
-# 6. Push branch to remote
-git push -u origin feature/12345-my-feature-description
+# 6. Push branch
+git push origin feature/add-user-dashboard
 ```
 
 ### 8.3 Commit Message Standards
@@ -1852,45 +1565,6 @@ git commit -m "fix: Correct data display issue
 Resolves #12348"
 ```
 
-#### 8.3.1 Commitlint (Optional Recommendation)
-
-**For enforcing uniform commit messages across all developers:**
-
-Commitlint can be added to ensure consistent commit message format. This is **optional but recommended** for larger teams.
-
-**Setup (if team decides to implement):**
-
-```bash
-# Install commitlint
-npm install --save-dev @commitlint/{config-conventional,cli}
-
-# Create commitlint config
-echo "module.exports = {extends: ['@commitlint/config-conventional']}" > commitlint.config.js
-
-# Add to package.json scripts
-{
-  "scripts": {
-    "commitlint": "commitlint --edit"
-  }
-}
-
-# Add to Husky (if using)
-npx husky add .husky/commit-msg 'npx --no -- commitlint --edit ${1}'
-```
-
-**Benefits:**
-- Enforces consistent commit message format
-- Prevents malformed commits
-- Easier to generate changelogs
-- Better Git history readability
-
-**Considerations:**
-- May be overkill for small teams
-- Adds slight overhead to commit process
-- Requires team buy-in and training
-
-**Decision:** Discuss with team before implementing. Current pre-commit hooks may be sufficient for code quality without commitlint.
-
 ### 8.4 Merge Request (MR) / Pull Request (PR) Process
 
 **Creating MR/PR:**
@@ -1907,50 +1581,55 @@ npx husky add .husky/commit-msg 'npx --no -- commitlint --edit ${1}'
    git push origin feature/12345-my-feature
    ```
 
-3. **Create MR in GitLab:**
-   - Navigate to GitLab repository
-   - Click "Merge Requests" → "New merge request"
-   - Source: `feature/12345-my-feature`
-   - Target: `develop`
-   - Fill out MR template (see below)
+3. **Create PR in GitHub:**
+   - Navigate to GitHub repository
+   - Click "Pull requests" → "New pull request"
+   - Source: `feature/my-feature`
+   - Target: `main`
+   - Fill out PR template (see below)
 
-**MR Template:**
+**PR Template:**
 ```markdown
 ## Description
-Brief description of what this MR accomplishes.
+Brief description of what this PR accomplishes.
 
-## Related Issue
-Closes #12345
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Refactoring
+- [ ] Documentation update
 
 ## Changes Made
-- Added user analytics dashboard
-- Implemented chart visualizations with ECharts
-- Created new API client for analytics data
-- Added E2E tests for dashboard functionality
+- Added user dashboard page
+- Implemented responsive design with Tailwind CSS
+- Created reusable components
+- Added proper TypeScript types
 
 ## Screenshots (if applicable)
-[Add screenshots here]
+[Add screenshots here for UI changes]
 
 ## Testing
 - [ ] Manual testing completed
-- [ ] E2E tests added/updated
-- [ ] Tested on Chrome, Firefox, Safari
-- [ ] Tested responsive design
-- [ ] No console errors
+- [ ] Tested on Chrome, Firefox
+- [ ] Tested responsive design (mobile, tablet, desktop)
+- [ ] No console errors or warnings
+- [ ] Unit tests added/updated (if applicable)
 
 ## Quality Gates
-- [ ] `npm run type-check` passes
-- [ ] `npm run lint-fix` completes successfully
+- [ ] `npx tsc --noEmit` passes
+- [ ] `npm run lint` passes
 - [ ] `npm run build` succeeds
-- [ ] No new warnings or errors introduced
+- [ ] No new TypeScript errors
 
 ## Checklist
-- [ ] Code follows project standards (see CODING_SOP.md)
+- [ ] Code follows project standards (see docs/coding-sop.md)
+- [ ] Used Server Components where appropriate
+- [ ] Client Components marked with 'use client'
 - [ ] Documentation updated (if needed)
 - [ ] No commented-out code
-- [ ] No console.log statements (except debug/warn/error)
 - [ ] Responsive design verified
-- [ ] Accessible (keyboard navigation, screen readers)
+- [ ] Accessible (keyboard navigation, ARIA labels)
+- [ ] No unused imports or variables
 ```
 
 ### 8.5 Code Review Guidelines
@@ -1958,7 +1637,6 @@ Closes #12345
 **For Reviewers:**
 - [ ] Code follows architecture patterns
 - [ ] TypeScript types are properly defined
-- [ ] MobX stores use proper patterns (hooks, flow, etc.)
 - [ ] API clients extend BaseApi correctly
 - [ ] Components use existing common components where possible
 - [ ] No performance anti-patterns (inline functions, objects in JSX)
@@ -1972,38 +1650,6 @@ Closes #12345
 - Address all comments before merging
 - Re-request review after making changes
 - Ensure CI/CD pipeline passes
-
-### 8.6 Release Process
-
-**Staging Release:**
-```bash
-# Run staging release script
-./.gitlab/staging-release-mr.sh <username> <token> [version]
-
-# Example
-./.gitlab/staging-release-mr.sh john.doe mytoken123 1.2.0
-```
-
-**Production Release:**
-```bash
-# Run production release script
-./.gitlab/prod-release-mr.sh <token> [version]
-
-# Example
-./.gitlab/prod-release-mr.sh mytoken123 1.2.0
-```
-
-**Release Notes Format:**
-```markdown
-### Changelog:
-* Bugfix: Resolve login redirect loop (#12348)
-* Improvement: Optimize chart rendering performance (#12352)
-* Feature: Add user analytics dashboard (#12345)
-
-### Version: 1.2.0
-```
-
----
 
 ## 9. Performance Standards
 
@@ -2032,71 +1678,109 @@ const Page = () => {
 };
 ```
 
-**Lazy Load Stores:**
-```typescript
-// Stores are automatically lazy-loaded via hooks
-// Just use the hook - it handles initialization
-const store = useCAStore();  // Loads store only when needed
-```
-
 ### 9.2 Image Optimization
 
 **Use Next.js Image Component:**
 ```typescript
 import Image from 'next/image';
 
-// Optimized image loading
+// Optimized image loading (static import)
+import heroImage from '@/public/hero.jpg';
+
 <Image
-  src="/images/hero.jpg"
+  src={heroImage}
   alt="Hero image"
-  width={800}
-  height={600}
   priority  // For above-the-fold images
-  placeholder="blur"
-  blurDataURL="/images/hero-blur.jpg"
+  placeholder="blur" // Automatic with static import
 />
 
-// Responsive images
+// External images (configure in next.config.ts)
 <Image
-  src="/images/product.jpg"
-  alt="Product"
-  layout="responsive"
-  width={16}
-  height={9}
+  src="https://example.com/image.jpg"
+  alt="External image"
+  width={800}
+  height={600}
+  loading="lazy"
 />
+
+// Responsive images with fill
+<div className="relative w-full h-64">
+  <Image
+    src="/product.jpg"
+    alt="Product"
+    fill
+    className="object-cover"
+  />
+</div>
+```
+
+**Configure External Images:**
+```typescript
+// next.config.ts
+import type { NextConfig } from 'next';
+
+const config: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'example.com',
+      },
+    ],
+  },
+};
+
+export default config;
 ```
 
 ### 9.3 Bundle Size Monitoring
 
 **Analyze Bundle Size:**
 ```bash
-# Full analysis (server + browser)
-npm run analyze
+# Install bundle analyzer
+npm install -D @next/bundle-analyzer
 
-# Browser bundle only
-npm run analyze:browser
+# Update next.config.ts
+# See: https://nextjs.org/docs/app/building-your-application/optimizing/bundle-analyzer
 
-# Server bundle only
-npm run analyze:server
+# Build with analysis
+ANALYZE=true npm run build
+
+# Check .next/analyze/ for reports
 ```
 
-**Review Generated Reports:**
-- `.next/analyze/client.html` - Browser bundle analysis
-- `.next/analyze/server.html` - Server bundle analysis
+**Monitor Bundle in Dev:**
+```bash
+# Build and check size
+npm run build
+
+# Look for warnings in build output:
+# ⚠ Compiled with warnings:
+# Route (app) Exceeds maximum recommended bundle size
+```
 
 **Actions if bundle is too large:**
-1. Check for large dependencies
-2. Implement dynamic imports for heavy components
-3. Remove unused dependencies: `npm run knip-dependencies`
-4. Split large files into smaller modules
-5. Use tree-shaking friendly imports:
+1. Use dynamic imports for large components:
+   ```typescript
+   import dynamic from 'next/dynamic';
+
+   const HeavyComponent = dynamic(() => import('./HeavyComponent'), {
+     loading: () => <p>Loading...</p>,
+   });
+   ```
+
+2. Check for large dependencies with `npm ls`
+
+3. Use named imports:
    ```typescript
    // ✅ GOOD: Tree-shakeable
-   import { Button } from 'antd';
+   import { useState } from 'react';
 
-   // ❌ BAD: Imports entire library
-   import * as antd from 'antd';
+   // ❌ BAD: Imports everything
+   import * as React from 'react';
    ```
+
+4. Move large dependencies to edge/runtime when possible
 
 ### 9.4 Performance Best Practices
 
@@ -2131,24 +1815,6 @@ import { FixedSizeList } from 'react-window';
     <div style={style}>{items[index]}</div>
   )}
 </FixedSizeList>
-```
-
-**MobX Performance:**
-```typescript
-// Use observer for fine-grained reactivity
-export const Component = observer(() => {
-  const store = useCAStore();
-  // Only re-renders when accessed store properties change
-  return <div>{store.specificProperty}</div>;
-});
-
-// Use computed values (views) for derived state
-.views(self => ({
-  get expensiveComputation() {
-    // Cached until dependencies change
-    return self.data.filter(item => item.isActive).length;
-  }
-}))
 ```
 
 **API Performance:**
@@ -2187,115 +1853,17 @@ useEffect(() => {
 
 **Sentry Performance Monitoring:**
 - Automatic transaction tracking enabled
-- OpenTelemetry integration configured
-- Check Sentry dashboard for slow transactions
 
-**Performance Budget:**
-- First Contentful Paint (FCP): < 1.8s
+**Performance Budget (Core Web Vitals):**
 - Largest Contentful Paint (LCP): < 2.5s
-- Time to Interactive (TTI): < 3.8s
-- Total Bundle Size: < 500KB (gzipped)
+- First Input Delay (FID): < 100ms
+- Cumulative Layout Shift (CLS): < 0.1
+- First Contentful Paint (FCP): < 1.8s
+- Total Bundle Size: Target < 200KB (initial load, gzipped)
 
 ---
 
 ## 10. Documentation Requirements
-
-### 10.1 Code Documentation
-
-**Component Documentation:**
-```typescript
-/**
- * UserDashboard displays user analytics with interactive charts.
- *
- * Features:
- * - Real-time data updates
- * - Interactive chart filtering
- * - Export to CSV/PDF
- *
- * @example
- * ```tsx
- * <UserDashboard userId="123" />
- * ```
- */
-interface UserDashboardProps {
-  /** User's unique identifier */
-  userId: string;
-  /** Optional date range for analytics */
-  dateRange?: { start: Date; end: Date };
-  /** Callback when export is triggered */
-  onExport?: (format: 'csv' | 'pdf') => void;
-}
-
-export const UserDashboard: React.FC<UserDashboardProps> = ({
-  userId,
-  dateRange,
-  onExport
-}) => {
-  // Implementation
-};
-```
-
-**Function Documentation:**
-```typescript
-/**
- * Fetches user analytics data from the API.
- *
- * @param userId - The user's unique identifier
- * @param options - Optional filtering and pagination options
- * @param options.startDate - Start date for analytics range
- * @param options.endDate - End date for analytics range
- * @param options.limit - Maximum number of results (default: 100)
- * @returns Promise resolving to analytics data
- * @throws {ApiError} If API request fails
- *
- * @example
- * ```typescript
- * const data = await getUserAnalytics('123', {
- *   startDate: '2024-01-01',
- *   endDate: '2024-01-31',
- *   limit: 50
- * });
- * ```
- */
-export async function getUserAnalytics(
-  userId: string,
-  options?: {
-    startDate?: string;
-    endDate?: string;
-    limit?: number;
-  }
-): Promise<AnalyticsData> {
-  // Implementation
-}
-```
-
-**Store Documentation:**
-```typescript
-/**
- * ContentOptimizerStore manages content analysis and optimization state.
- *
- * Features:
- * - Content analysis with AI
- * - SEO recommendations
- * - Readability scoring
- * - Keyword optimization
- *
- * @example
- * ```typescript
- * const store = useCAStore();
- * const { contentOptimizer } = store;
- *
- * await contentOptimizer.analyzeContent({
- *   text: 'Content to analyze',
- *   targetKeywords: ['seo', 'optimization']
- * });
- * ```
- */
-export const ContentOptimizerStore = types
-  .model('ContentOptimizerStore', {
-    // ...
-  });
-```
 
 ### 10.2 When to Add Documentation
 
@@ -2330,7 +1898,6 @@ Brief description of the feature and its purpose.
 \`\`\`
 feature/
 ├── components/
-├── stores/
 ├── api/
 └── utils/
 \`\`\`
@@ -2344,7 +1911,6 @@ import { FeatureComponent } from './feature';
 
 ## API
 - `FeatureComponent` - Main component
-- `useFeatureStore()` - Store access hook
 - `featureApi` - API client
 
 ## Configuration
@@ -2371,116 +1937,91 @@ npm run test:e2e -- e2e/tests/feature.spec.ts
 
 ## 11. Quick Reference
 
-### 11.1 Common Commands Cheatsheet
-
-```bash
-# Development
-make dev                    # Start dev server
-make package-install        # Install dependencies
-
-# Quality Checks
-make lint-fix               # Full linting (ESLint + Stylelint + Type check)
-npm run type-check          # TypeScript only
-npm run lint                # ESLint only
-npm run css-lint            # Stylelint only
-
-# Code Analysis
-npm run knip                # Dead code detection
-npm run find:unused         # Unused files
-npm run analyze             # Bundle analysis
-
-# Building
-npm run build               # Production build
-npm run build:local         # Local build
-
-# Testing
-npm run test:e2e            # E2E tests
-npm run test:e2e:ui         # E2E UI mode
-npm run test:e2e:debug      # E2E debug mode
-
-# Git
-git checkout develop        # Switch to develop
-git pull origin develop     # Pull latest
-git checkout -b feature/123-name  # Create feature branch
-git add .                   # Stage changes
-git commit -m "message"     # Commit (hooks run)
-git push -u origin feature/123-name  # Push branch
-```
-
 ### 11.2 File Path Quick Reference
 
 ```
-Common Components:     src/components/common-components/components/
-Dashboard Components:  src/components/dashboard/
-Pages:                 src/pages/
-Stores:                src/store/specialized-stores/
-Store Hooks:           src/store/hooks/
-API Clients:           src/api/
-Utils:                 src/utils/
-E2E Tests:             e2e/tests/
-Documentation:         @docs/
+Pages:                 src/app/*/page.tsx
+Layouts:               src/app/*/layout.tsx
+API Routes:            src/app/api/*/route.ts
+Components:            src/components/ (create as needed)
+Utilities:             src/lib/ (create as needed)
+Types:                 src/types/ (create as needed)
+Documentation:         docs/
+Public Assets:         public/
 ```
 
 ### 11.3 Import Path Quick Reference
 
 ```typescript
-// Components
-import { Button } from '@/components/common-components/components/button';
-import { Modal } from '@/components/common-components/components/modal';
+// Next.js imports
+import Link from 'next/link';
+import Image from 'next/image';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 
-// Stores
-import { useCAStore } from '@/store/hooks/useCAStore';
-import { useCommonStore } from '@/store/hooks/useCommonStore';
+// Components (using @ alias from tsconfig)
+import { Button } from '@/components/Button';
+import { Header } from '@/components/Header';
 
-// API
-import { BaseApi } from '@/api/base-api';
-import { getApiUrl } from '@/api/common-utils';
-
-// Utils
-import { getLocalStorageItem } from '@/utils/safe-localStorage';
-import { formatDate } from '@/utils/date-utils';
+// Utilities
+import { formatDate } from '@/lib/utils/date';
+import { cn } from '@/lib/utils/className';
 
 // Types
-import type { UserModel } from '@/types/user';
+import type { IUser } from '@/types/user';
+import type { TUserRole } from '@/types/roles';
 
-// Styles
-import styles from './style.module.scss';
+// API
+import { NextRequest, NextResponse } from 'next/server';
 ```
 
 ### 11.4 Common Patterns Quick Reference
 
-**Component:**
+**Server Component:**
 ```typescript
-export const Component: React.FC<Props> = observer(({ prop }) => {
-  const store = useCAStore();
-  return <div>{store.data}</div>;
-});
+// Default - can fetch data directly
+export default async function Page() {
+  const data = await fetchData();
+  return <div>{data}</div>;
+}
 ```
 
-**Store Action:**
+**Client Component:**
 ```typescript
-fetchData: flow(function* (params) {
-  self.isLoading = true;
-  try {
-    const response = yield api.getData(params);
-    self.data = response.data;
-  } catch (error) {
-    self.error = error.message;
-  } finally {
-    self.isLoading = false;
-  }
-})
+'use client';
+import { useState } from 'react';
+
+export function Component({ prop }: Props) {
+  const [data, setData] = useState<IDataProp | null>(null);
+  return <div>{data?.value}</div>;
+}
 ```
 
-**API Client:**
+**API Route:**
 ```typescript
-export class FeatureApi extends BaseApi {
-  constructor() {
-    super(getApiUrl(BaseApi.LG_HOST));
-  }
-  async getData(params: Params): Promise<Response> {
-    return this.get('/api/endpoint/', params);
-  }
+// src/app/api/users/route.ts
+import { NextResponse } from 'next/server';
+
+export async function GET() {
+  const data = await fetchUsers();
+  return NextResponse.json({ data });
+}
+```
+
+**Client-side Data Fetching:**
+```typescript
+'use client';
+import { useEffect, useState } from 'react';
+
+export function DataComponent() {
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    fetch('/api/data')
+      .then(r => r.json())
+      .then(setData);
+  }, []);
+
+  return <div>{data}</div>;
 }
 ```
 
@@ -2490,150 +2031,63 @@ export class FeatureApi extends BaseApi {
 
 ### 12.1 Common Issues & Solutions
 
-#### Issue: Pre-commit hook fails with ESLint errors
+#### Issue: ESLint errors
 
 **Solution:**
 ```bash
-# Run lint-fix to auto-fix issues
-npm run lint-fix
+# Run linter
+npm run lint
 
-# Check remaining errors
-npm run lintVerbose
+# Check TypeScript errors
+npx tsc --noEmit
 
-# Fix manually if needed, then retry commit
+# Fix manually, then retry
 git add .
 git commit -m "Your message"
 ```
 
-#### Issue: TypeScript errors during build
+#### Issue: Build fails with TypeScript errors
 
 **Solution:**
 ```bash
-# Run type check to see all errors
-npm run type-check
+# Check for type errors
+npx tsc --noEmit
 
-# Common fixes:
-# - Add missing types/interfaces
-# - Fix any type assertions
-# - Add proper null checks
-# - Update tsconfig.json if needed
+# Common issues:
+# - Missing types: npm install -D @types/[package]
+# - Wrong import paths: Check tsconfig.json paths
+# - 'use client' missing: Add to components using hooks
 ```
 
-#### Issue: Store not loading / undefined store error
+#### Issue: "Hydration mismatch" errors
 
 **Solution:**
 ```typescript
-// ❌ WRONG: Direct access
-const store = getStore().contentAnalysisTools;  // May be undefined
-
-// ✅ CORRECT: Use hook
-const store = useCAStore();  // Ensures store is initialized
-```
-
-#### Issue: Component not re-rendering with MobX state changes
-
-**Solution:**
-```typescript
-// ❌ WRONG: Missing observer
-const Component = () => {
-  const store = useCAStore();
-  return <div>{store.data}</div>;  // Won't react to changes
-};
-
-// ✅ CORRECT: With observer
-const Component = observer(() => {
-  const store = useCAStore();
-  return <div>{store.data}</div>;  // Reacts to changes
-});
-```
-
-#### Issue: API calls failing with 401 Unauthorized
-
-**Solution:**
-```bash
-# Check if token is valid
-# Token is automatically managed by BaseApi
-# If issue persists:
-# 1. Clear localStorage
-# 2. Log out and log back in
-# 3. Check .env file for correct API hosts
-```
-
-#### Issue: Bundle size too large
-
-**Solution:**
-```bash
-# Analyze bundle
-npm run analyze:browser
-
-# Find large dependencies and consider:
-# 1. Dynamic imports for large components
-# 2. Remove unused dependencies: npm run knip-dependencies
-# 3. Use tree-shakeable imports
-# 4. Split large components into smaller ones
-```
-
-#### Issue: Memory leak in component
-
-**Solution:**
-```typescript
-// ✅ Clean up effects
-useEffect(() => {
-  const subscription = store.subscribe();
-  const timer = setTimeout(() => {}, 1000);
-
-  return () => {
-    subscription.unsubscribe();
-    clearTimeout(timer);
-  };
-}, []);
-
-// ✅ Cancel API requests
-useEffect(() => {
-  const controller = new AbortController();
-  api.getData({ signal: controller.signal });
-
-  return () => controller.abort();
-}, []);
-```
-
-#### Issue: Styles not applying / CSS specificity issues
-
-**Solution:**
-```scss
-// Use BEM methodology to avoid specificity wars
-.component {
-  &__element {
-    // Styles here
-  }
+// Avoid using browser-only code in Server Components
+// Bad:
+export default function Page() {
+  const width = window.innerWidth; // Error!
+  return <div>{width}</div>;
 }
 
-// Don't nest too deeply (max 10 levels)
-// Use CSS modules to avoid global conflicts
+// Good:
+'use client';
+export function ClientComponent() {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    setWidth(window.innerWidth);
+  }, []);
+  return <div>{width}</div>;
+}
 ```
 
 ### 12.2 Getting Help
 
 **Resources:**
-1. **Project Documentation**: [CLAUDE.md](./CLAUDE.md)
-2. **Technical Docs**: `@docs/` directory
-3. **Codebase Examples**: Search for similar implementations
-4. **Team Members**: Ask experienced developers
-5. **Git History**: Check how similar issues were resolved
-
-**Before Asking for Help:**
-- [ ] Read relevant documentation
-- [ ] Search codebase for similar patterns
-- [ ] Check git history for related changes
-- [ ] Try debugging with console.log / React DevTools
-- [ ] Review error messages carefully
-
-**When Asking for Help:**
-- Provide context (what you're trying to do)
-- Share error messages (full stack trace)
-- Show code snippets (relevant parts)
-- Explain what you've already tried
-- Include screenshots if UI-related
+1. **Project Documentation**: [README.md](../README.md)
+2. **This SOP**: [docs/coding-sop.md](./coding-sop.md)
+3. **Next.js Docs**: Check `node_modules/next/dist/docs/` or https://nextjs.org/docs
+4. **Codebase Examples**: Search for similar implementations
 
 ---
 
@@ -2648,21 +2102,18 @@ useEffect(() => {
 ### During Development Checklist
 - [ ] Using existing common components
 - [ ] Following TypeScript standards (Interfaces: `I` prefix, Types: `T` prefix)
-- [ ] No `any` types unless absolutely necessary
-- [ ] Using store hooks correctly (never direct store access)
+- [ ] No `any` types
+- [ ] Using hooks correctly
 - [ ] Extending BaseApi for API clients
 - [ ] Implementing proper error handling
 - [ ] Adding test IDs for E2E testing
 - [ ] Functions with 3+ params use object destructuring
 - [ ] useEffect dependencies are primitives (not objects)
 - [ ] No props spreading (`[...items]`, `{...props}`)
-- [ ] Using MobX `reaction` for store-based side effects
-- [ ] SCSS variables used (no hardcoded colors/spacing)
 - [ ] Accessibility considered (keyboard nav, aria labels)
 - [ ] Writing self-documenting code
 
 ### Pre-Commit Checklist
-- [ ] Pre-commit hooks pass
 - [ ] No console errors in development
 - [ ] Component renders correctly
 - [ ] Responsive design verified
@@ -2672,8 +2123,8 @@ useEffect(() => {
 - [ ] `npm run type-check` passes
 - [ ] `npm run lint-fix` completes
 - [ ] `npm run build` succeeds
-- [ ] Manual testing completed (Section 7.2)
-- [ ] Accessibility testing completed (Section 7.5)
+- [ ] Manual testing completed
+- [ ] Accessibility testing completed
   - [ ] Keyboard navigation verified
   - [ ] Screen reader support tested
   - [ ] Focus indicators visible
@@ -2691,11 +2142,9 @@ useEffect(() => {
   - [ ] No props spreading
   - [ ] useEffect deps are primitives
   - [ ] No inline functions/objects in JSX
-  - [ ] MobX reactions used appropriately
 - [ ] Error handling comprehensive
 - [ ] No security vulnerabilities
 - [ ] Accessibility implemented correctly
-- [ ] SCSS variables used (no hardcoded values)
 - [ ] Functions with 3+ params use object destructuring
 - [ ] Tests included
 - [ ] Documentation updated
@@ -2704,12 +2153,14 @@ useEffect(() => {
 
 ## Appendix B: VSCode Recommended Settings
 
+Create `.vscode/settings.json` in your project:
+
 ```json
 {
-  "editor.formatOnSave": false,
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": true,
-    "source.fixAll.stylelint": true
+    "source.fixAll.eslint": "explicit"
   },
   "eslint.validate": [
     "javascript",
@@ -2720,10 +2171,19 @@ useEffect(() => {
   "typescript.tsdk": "node_modules/typescript/lib",
   "typescript.enablePromptUseWorkspaceTsdk": true,
   "files.associations": {
-    "*.css": "scss"
-  }
+    "*.css": "tailwindcss"
+  },
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ]
 }
 ```
+
+**Recommended Extensions:**
+- ESLint
+- Tailwind CSS IntelliSense
+- Prettier - Code formatter
+- TypeScript and JavaScript Language Features (built-in)
 
 ---
 
@@ -2733,11 +2193,6 @@ useEffect(() => {
 - Install React DevTools extension
 - Use Profiler to identify slow renders
 - Use Components tab to inspect props/state
-
-**Redux DevTools (for MobX):**
-- Install MobX DevTools extension
-- Monitor store state changes
-- Time-travel debugging
 
 **Network Tab:**
 - Monitor API calls
@@ -2752,5 +2207,3 @@ useEffect(() => {
 ---
 
 **End of SOP Document**
-
-For questions, clarifications, or updates to this SOP, please contact the development team or create an issue in the repository.
